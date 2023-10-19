@@ -1,0 +1,52 @@
+// ==UserScript==
+// @name         Check noindex Tampermonkey Script
+// @version      1.0
+// @description  Check if the current site is set to noindex and display an overlay if it is.
+// @author       Thore Janke
+// @match        *://*/*
+// @grant        none
+// ==/UserScript==
+
+(function() {
+    'use strict';
+
+    // Function to check if the current site is set to noindex
+    function isNoIndex() {
+        const metaTags = document.querySelectorAll('meta[name="robots"]');
+        for (const tag of metaTags) {
+            if (tag.getAttribute('content').toLowerCase().includes('noindex')) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // Function to create and display the overlay
+    function createOverlay() {
+        const overlay = document.createElement('div');
+        overlay.style.position = 'fixed';
+        overlay.style.top = '0';
+        overlay.style.right = '0';
+        overlay.style.width = '100px';
+        overlay.style.height = '100px';
+        overlay.style.backgroundColor = 'red';
+        overlay.style.color = 'white';
+        overlay.style.textAlign = 'center';
+        overlay.style.zIndex = '99999999999999999999999';
+        overlay.style.transform = 'rotate(-45deg)';
+        overlay.style.transformOrigin = 'top right';
+        overlay.style.cursor = 'pointer';
+        overlay.textContent = 'noindex!';
+        // Add a click event listener to remove the overlay when clicked
+        overlay.addEventListener('click', function() {
+            overlay.style.display = 'none';
+        });
+
+        document.body.appendChild(overlay);
+    }
+
+    // Check if the current site is set to noindex and create the overlay if necessary
+    if (isNoIndex()) {
+        createOverlay();
+    }
+})();
