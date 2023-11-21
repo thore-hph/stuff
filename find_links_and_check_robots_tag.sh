@@ -1,21 +1,23 @@
 #!/bin/bash
-#v1.3 thore@homepage-helden.de
+#noindex finder
+#v1.37 thore@homepage-helden.de
+#I can not guarantee that this script will work for you or that it will find all links on all pages. Use at your own risk.
+debug=false
 function scan_page {
     local domain=$1
     local page=$2
-    local url="$domain$page"
+    local url="${domain}${page%/}/"
     touch urls_found.txt
     if ! grep -Fxq "$url" urls_found.txt; then
         echo "$url" >> urls_found.txt
-        curl -s "$url" | awk -F'"' '/href="|src="/{print $2}' | while read -r sub_page; do
-            if [[ $sub_page =~ ^$domain|^/[^/] ]] && [[ $sub_page =~ \.html$|\.php$|\.asp$|/$ ]] && ! [[ $sub_page =~ \.css$|\.js$ ]] && ! [[ $sub_page =~ "<!\[CDATA\[" ]]; then
+        curl -s "$url" | awk -F'href="' '{print $2}' | awk -F'"' '{print $1}' | while read -r sub_page; do
+            if [[ $sub_page =~ ^$domain|^/[^/] ]] && ! [[ $sub_page =~ \.[^/]+$|"wishlist_notice=true"|"mailto:"|"tel:"|"wp-json"|"?"|"#" ]] && ! [[ $sub_page =~ "<!\[CDATA\[" ]]; then
                 sub_page="${sub_page#$domain}"
                 scan_page "$domain" "$sub_page"
             fi
         done
     fi
 }
-
 if [ $1 ]; then
     domain=${1%/}
     rm -f robots_results.tsv urls_found.txt noindex_urls.txt
